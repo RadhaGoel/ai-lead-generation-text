@@ -1,4 +1,6 @@
-import feedparser
+import requests
+
+API_KEY = "cdf32e7439a8486bae029bcd82b1d772"
 
 KEYWORDS = [
     "real estate digital transformation",
@@ -13,23 +15,25 @@ def fetch_news():
 
     for keyword in KEYWORDS:
 
-        url = f"https://news.google.com/rss/search?q={keyword}"
-
-        feed = feedparser.parse(
-            url,
-            request_headers={
-                "User-Agent": "Mozilla/5.0"
-            }
+        url = (
+            f"https://newsapi.org/v2/everything?"
+            f"q={keyword}&"
+            f"language=en&"
+            f"sortBy=publishedAt&"
+            f"apiKey={API_KEY}"
         )
 
-        for entry in feed.entries[:5]:
+        response = requests.get(url)
+        data = response.json()
 
-            article = {
-                "title": entry.title,
-                "link": entry.link,
-                "summary": entry.summary
-            }
+        if "articles" in data:
 
-            articles.append(article)
+            for article in data["articles"][:5]:
+
+                articles.append({
+                    "title": article["title"],
+                    "link": article["url"],
+                    "summary": article["description"]
+                })
 
     return articles
